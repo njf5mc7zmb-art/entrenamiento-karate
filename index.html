@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Karate Dojo - Entrenamiento por Números</title>
+    <style>
+        :root {
+            --bg-dark: #0a0d14;
+            --card-bg: #141923;
+            --card-border: #242d3d;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-red: #e11d48;
+            --accent-red-hover: #be123c;
+            --accent-gold: #f59e0b;
+            --accent-gold-hover: #d97706;
+            --accent-green: #10b981;
+            --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: var(--font-stack);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            gap: 16px;
+        }
+
+        header {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 14px 18px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .kanji-badge {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-red), #880808);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 900;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(225, 29, 72, 0.4);
+        }
+
+        .title-text h1 {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+
+        .title-text h1 span {
+            color: var(--accent-red);
+        }
+
+        .title-text p {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .stat-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .stat-card strong {
+            font-family: monospace;
+            font-size: 15px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+        }
+
+        @media (min-width: 850px) {
+            .grid-layout {
+                grid-template-columns: 1.2fr 0.8fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        .display-box {
+            background: radial-gradient(circle at center, #1c2333 0%, var(--card-bg) 100%);
+            border: 2px solid var(--card-border);
+            border-radius: 18px;
+            min-height: 260px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            text-align: center;
+            padding: 20px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .display-box.active-run {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 25px rgba(225, 29, 72, 0.3);
+        }
+
+        .badge-status {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(10, 13, 20, 0.8);
+            border: 1px solid var(--card-border);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+        }
+
+        .badge-status.active .status-dot {
+            background: var(--accent-red);
+            box-shadow: 0 0 8px var(--accent-red);
+        }
+
+        .badge-status.active {
+            color: var(--accent-red);
+            border-color: rgba(225, 29, 72, 0.4);
+        }
+
+        .mute-toggle {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--bg-dark);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .giant-num {
+            font-size: 100px;
+            font-weight: 900;
+            font-family: monospace;
+            line-height: 1;
+            color: #334155;
+            transition: transform 0.15s, color 0.15s;
+            margin: 10px 0;
+        }
+
+        .giant-num.lit {
+            color: var(--accent-red);
+            text-shadow: 0 0 25px rgba(225, 29, 72, 0.5);
+            transform: scale(1.05);
+        }
+
+        .tech-subtitle {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--accent-gold);
+            min-height: 30px;
+        }
+
+        .recent-list {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .tag-history {
+            background: var(--bg-dark);
+            border: 1px solid var(--card-border);
+            color: var(--accent-gold);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.15s, transform 0.1s;
+            user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-main {
+            background: linear-gradient(135deg, var(--accent-red), var(--accent-red-hover));
+            color: white;
+            flex: 2;
+            box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4);
+        }
+
+        .btn-sub {
+            background: var(--bg-dark);
+            border: 1px solid var(--card-border);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-sub:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--accent-gold);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .slider-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--card-border);
+            padding: 12px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .slider-header strong {
+            color: var(--text-primary);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 4px;
+            outline: none;
+            accent-color: var(--accent-red);
+            cursor: pointer;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        @media (min-width: 480px) {
+            .options-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .opt-btn {
+            background: var(--bg-dark);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            padding: 10px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-align: center;
+        }
+
+        .opt-btn.active {
+            border-color: var(--accent-red);
+            background: rgba(225, 29, 72, 0.15);
+            color: #fff;
+        }
+
+        .opt-btn small {
+            font-size: 9px;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+
+        /* Form Custom Techniques */
+        .add-box {
+            display: flex;
+            gap: 8px;
+            background: var(--bg-dark);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+
+        .input-num {
+            width: 65px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: white;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .input-text {
+            flex: 1;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: white;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .input-num:focus, .input-text:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-hover));
+            color: #000;
+            font-weight: 900;
+            border: none;
+            padding: 0 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-dark);
+            border: 1px solid var(--card-border);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        .item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .num-pill {
+            width: 28px;
+            height: 28px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--accent-gold);
+            font-weight: bold;
+            font-family: monospace;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .item-name {
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+        }
+
+        .icon-btn:hover {
+            color: var(--accent-red);
+        }
+
+        .countdown-mask {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 13, 20, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            z-index: 10;
+        }
+
+        .countdown-mask.hidden {
+            display: none;
+        }
+
+        .count-val {
+            font-size: 80px;
+            font-weight: 900;
+            color: var(--accent-red);
+            font-family: monospace;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-secondary);
+            padding: 8px;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="kanji-badge">武</div>
+            <div class="title-text">
+                <h1>KARATE <span>DOJO</span></h1>
+                <p>Entrenamiento de Reacción</p>
+            </div>
+        </div>
+        <div class="stats-group">
+            <div class="stat-card">
+                <span style="color:var(--accent-gold)">⏱</span>
+                <strong id="timeDisplay">00:00</strong>
+            </div>
+            <div class="stat-card">
+                <span style="color:var(--accent-red)">👊</span>
+                <strong id="repDisplay" style="color:var(--accent-red)">0</strong>
+            </div>
+        </div>
+    </header>
+
+    <main class="grid-layout">
+        
+        <!-- Left Side: Interactive Screen & Controls -->
+        <section style="display:flex; flex-direction:column; gap:16px;">
+            
+            <div class="display-box" id="displayCard">
+                <div class="badge-status" id="statusBadge">
+                    <div class="status-dot"></div>
+                    <span id="statusTxt">MOKUSO (LISTO)</span>
+                </div>
+
+                <button type="button" class="mute-toggle" id="btnMute" title="Silenciar audio">🔊</button>
+
+                <div class="countdown-mask hidden" id="countdownOverlay">
+                    <div style="color:var(--accent-gold); font-weight:800; font-size:13px; letter-spacing:2px; margin-bottom:6px;">KAMAETE (EN GUARDIA)</div>
+                    <div class="count-val" id="countdownVal">3</div>
+                </div>
+
+                <div class="giant-num" id="giantNumDisplay">--</div>
+                <div class="tech-subtitle" id="techSubDisplay">Presiona HAJIME para empezar</div>
+
+                <div class="recent-list">
+                    <span>Últimos:</span>
+                    <div id="recentHistory" style="display:flex; gap:4px;"><span style="opacity:0.5;">ninguno</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="btn-row">
+                    <button type="button" class="btn btn-main" id="btnStart">
+                        <span>▶️</span> <span>HAJIME !</span>
+                    </button>
+                    <button type="button" class="btn btn-sub" id="btnNext" disabled>
+                        <span>⏭ Siguiente</span>
+                    </button>
+                    <button type="button" class="btn btn-sub" id="btnStop">
+                        <span>⏹ YAMÉ</span>
+                    </button>
+                </div>
+
+                <div class="slider-card">
+                    <div class="section-label">🎲 Intervalo Aleatorio Impredecible</div>
+                    <div class="slider-header">
+                        <span>Tiempo de espera al azar:</span>
+                        <strong id="rangeInfoLabel" style="color:var(--accent-gold)">Entre 2.0s y 5.0s</strong>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:4px;">
+                        <div>
+                            <div class="slider-header"><span>Mínimo:</span> <strong id="minLabel">2.0s</strong></div>
+                            <input type="range" id="minRange" min="1.0" max="5.0" step="0.5" value="2.0">
+                        </div>
+                        <div>
+                            <div class="slider-header"><span>Máximo:</span> <strong id="maxRange">5.0s</strong></div>
+                            <input type="range" id="maxRangeInput" min="2.5" max="12.0" step="0.5" value="5.0">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section-label" style="margin-bottom:8px;">📢 Dictado por Voz (Sensei)</div>
+                    <div class="options-grid">
+                        <button type="button" class="opt-btn active" id="vModeNum">
+                            <span># Solo Número</span>
+                            <small>"Uno"</small>
+                        </button>
+                        <button type="button" class="opt-btn" id="vModeTech">
+                            <span>📝 Solo Técnica</span>
+                            <small>"Gyaku Zuki"</small>
+                        </button>
+                        <button type="button" class="opt-btn" id="vModeBoth">
+                            <span>🔄 Número + Técnica</span>
+                            <small>"Uno, Gyaku Zuki"</small>
+                        </button>
+                        <button type="button" class="opt-btn" id="vModeSilent">
+                            <span>🔇 Silencioso</span>
+                            <small>Sin voz</small>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <div class="section-label" style="margin-bottom:8px;">👁 Pantalla Visual</div>
+                        <div class="options-grid" style="grid-template-columns: 1fr 1fr;">
+                            <button type="button" class="opt-btn active" id="dModeNum">Solo #</button>
+                            <button type="button" class="opt-btn" id="dModeBoth"># + Nombre</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:flex-end;">
+                        <div style="background:var(--bg-dark); border:1px solid var(--card-border); padding:10px 12px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; width:100%; font-size:12px; font-weight:600;">
+                            <span>Sin repetir seguido</span>
+                            <input type="checkbox" id="chkNoRepeat" checked style="accent-color:var(--accent-gold); width:16px; height:16px;">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Right Side: Custom Techniques Management -->
+        <section class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--card-border); padding-bottom:10px;">
+                <div>
+                    <div style="font-weight:800; font-size:15px; color:white;">TUS NÚMEROS Y TÉCNICAS</div>
+                    <div style="font-size:11px; color:var(--text-secondary);">Asigna cada número a una técnica de Karate</div>
+                </div>
+                <div id="activeCounterBadge" style="font-size:11px; font-weight:800; color:var(--accent-gold); background:var(--bg-dark); padding:4px 8px; border-radius:10px; border:1px solid var(--card-border);">0 Activos</div>
+            </div>
+
+            <!-- Custom Input Box (Direct Button Action - No Form Submission) -->
+            <div class="add-box">
+                <input type="number" id="inputNum" class="input-num" placeholder="Nº" min="1" max="99">
+                <input type="text" id="inputText" class="input-text" placeholder="Ej: Gyaku Zuki">
+                <button type="button" class="btn-save" id="btnSaveTech">Guardar</button>
+            </div>
+
+            <div class="list-container" id="techniquesContainer">
+                <!-- Dynamically populated -->
+            </div>
+
+            <div style="border-top:1px solid var(--card-border); padding-top:10px; display:flex; justify-content:space-between; font-size:11px;">
+                <button type="button" id="btnRestoreDefaults" class="icon-btn" style="color:var(--accent-gold)">↺ Cargar Kihon Básico</button>
+                <button type="button" id="btnClearAll" class="icon-btn" style="color:var(--accent-red)">🗑 Vaciar lista</button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <b>Karate Dojo</b> &bull; Funciona 100% Offline en iPhone y Android
+    </footer>
+
+    <script>
+        // Default Karate Presets
+        const DEFAULT_PRESETS = [
+            { num: 1, name: 'Oi Zuki', active: true },
+            { num: 2, name: 'Gyaku Zuki', active: true },
+            { num: 3, name: 'Age Uke', active: true },
+            { num: 4, name: 'Soto Uke', active: true },
+            { num: 5, name: 'Gedan Barai', active: true },
+            { num: 6, name: 'Mae Geri', active: true },
+            { num: 7, name: 'Mawashi Geri', active: true }
+        ];
+
+        // Application State
+        let techniques = [];
+        let isRunning = false;
+        let isMuted = false;
+        let voiceMode = 'number_only'; // 'number_only', 'tech_only', 'both', 'silent'
+        let displayMode = 'number_only'; // 'number_only', 'both'
+        let minTime = 2.0;
+        let maxTime = 5.0;
+
+        let timerTimeout = null;
+        let clockInterval = null;
+        let elapsedSeconds = 0;
+        let repCounter = 0;
+        let lastSelected = null;
+        let historyArray = [];
+
+        // Audio and Speech Synthesis
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const synth = window.speechSynthesis;
+
+        function playBeep(freq = 600, duration = 0.1) {
+            if (isMuted) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function speak(text) {
+            if (isMuted || voiceMode === 'silent' || !text) return;
+            if (!('speechSynthesis' in window)) return;
+
+            synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.15;
+            utterance.lang = 'es-ES';
+            synth.speak(utterance);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSavedTechniques();
+            bindEvents();
+            updateSliderDisplay();
+        });
+
+        function loadSavedTechniques() {
+            const raw = localStorage.getItem('karate_dojo_techniques');
+            if (raw) {
+                try {
+                    techniques = JSON.parse(raw);
+                } catch(e) {
+                    techniques = [...DEFAULT_PRESETS];
+                }
+            } else {
+                techniques = [...DEFAULT_PRESETS];
+            }
+            renderTechniqueList();
+        }
+
+        function saveTechniques() {
+            localStorage.setItem('karate_dojo_techniques', JSON.stringify(techniques));
+            renderTechniqueList();
+        }
+
+        function renderTechniqueList() {
+            const container = document.getElementById('techniquesContainer');
+            container.innerHTML = '';
+
+            techniques.sort((a,b) => a.num - b.num);
+
+            const activeCount = techniques.filter(t => t.active).length;
+            document.getElementById('activeCounterBadge').textContent = `${activeCount} Activos`;
+
+            if (techniques.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:var(--text-secondary); font-size:12px; padding:24px;">No hay técnicas guardadas. Agrega una arriba.</div>`;
+                return;
+            }
+
+            techniques.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'item-row';
+                if (!item.active) row.style.opacity = '0.4';
+
+                row.innerHTML = `
+                    <div class="item-left">
+                        <input type="checkbox" ${item.active ? 'checked' : ''} onchange="toggleItemActive(${item.num})" style="accent-color:var(--accent-red); width:16px; height:16px; cursor:pointer;">
+                        <div class="num-pill">${item.num}</div>
+                        <div class="item-name">${escapeHtml(item.name)}</div>
+                    </div>
+                    <button type="button" class="icon-btn" onclick="deleteItem(${item.num})" title="Eliminar">✕</button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Direct Save Action without Form Reload
+        document.getElementById('btnSaveTech').addEventListener('click', () => {
+            const numEl = document.getElementById('inputNum');
+            const textEl = document.getElementById('inputText');
+
+            const num = parseInt(numEl.value, 10);
+            const name = textEl.value.trim();
+
+            if (isNaN(num) || num <= 0) {
+                alert('Por favor ingresa un número mayor a 0');
+                return;
+            }
+            if (!name) {
+                alert('Por favor ingresa el nombre de la técnica');
+                return;
+            }
+
+            const existing = techniques.find(t => t.num === num);
+            if (existing) {
+                existing.name = name;
+                existing.active = true;
+            } else {
+                techniques.push({ num, name, active: true });
+            }
+
+            saveTechniques();
+
+            numEl.value = '';
+            textEl.value = '';
+        });
+
+        window.toggleItemActive = function(num) {
+            const item = techniques.find(t => t.num === num);
+            if (item) {
+                item.active = !item.active;
+                saveTechniques();
+            }
+        };
+
+        window.deleteItem = function(num) {
+            techniques = techniques.filter(t => t.num !== num);
+            saveTechniques();
+        };
+
+        document.getElementById('btnRestoreDefaults').addEventListener('click', () => {
+            techniques = JSON.parse(JSON.stringify(DEFAULT_PRESETS));
+            saveTechniques();
+        });
+
+        document.getElementById('btnClearAll').addEventListener('click', () => {
+            techniques = [];
+            saveTechniques();
+        });
+
+        function bindEvents() {
+            document.getElementById('btnMute').addEventListener('click', () => {
+                isMuted = !isMuted;
+                document.getElementById('btnMute').textContent = isMuted ? '🔇' : '🔊';
+            });
+
+            document.getElementById('btnStart').addEventListener('click', toggleStart);
+            document.getElementById('btnNext').addEventListener('click', () => triggerNext(true));
+            document.getElementById('btnStop').addEventListener('click', stopTraining);
+
+            document.getElementById('minRange').addEventListener('input', updateSliderDisplay);
+            document.getElementById('maxRangeInput').addEventListener('input', updateSliderDisplay);
+
+            // Voice mode option buttons
+            document.getElementById('vModeNum').addEventListener('click', () => setVoiceMode('number_only'));
+            document.getElementById('vModeTech').addEventListener('click', () => setVoiceMode('tech_only'));
+            document.getElementById('vModeBoth').addEventListener('click', () => setVoiceMode('both'));
+            document.getElementById('vModeSilent').addEventListener('click', () => setVoiceMode('silent'));
+
+            // Display mode option buttons
+            document.getElementById('dModeNum').addEventListener('click', () => setDisplayMode('number_only'));
+            document.getElementById('dModeBoth').addEventListener('click', () => setDisplayMode('both'));
+        }
+
+        function updateSliderDisplay() {
+            let minVal = parseFloat(document.getElementById('minRange').value);
+            let maxVal = parseFloat(document.getElementById('maxRangeInput').value);
+
+            if (minVal >= maxVal) {
+                maxVal = minVal + 0.5;
+                document.getElementById('maxRangeInput').value = maxVal;
+            }
+
+            minTime = minVal;
+            maxTime = maxVal;
+
+            document.getElementById('minLabel').textContent = minTime.toFixed(1) + 's';
+            document.getElementById('maxLabel').textContent = maxTime.toFixed(1) + 's';
+            document.getElementById('rangeInfoLabel').textContent = `Entre ${minTime.toFixed(1)}s y ${maxTime.toFixed(1)}s`;
+        }
+
+        function setVoiceMode(mode) {
+            voiceMode = mode;
+            ['Num', 'Tech', 'Both', 'Silent'].forEach(m => {
+                const btn = document.getElementById('vMode' + m);
+                if (btn) btn.classList.remove('active');
+            });
+            if (mode === 'number_only') document.getElementById('vModeNum').classList.add('active');
+            if (mode === 'tech_only') document.getElementById('vModeTech').classList.add('active');
+            if (mode === 'both') document.getElementById('vModeBoth').classList.add('active');
+            if (mode === 'silent') document.getElementById('vModeSilent').classList.add('active');
+        }
+
+        function setDisplayMode(mode) {
+            displayMode = mode;
+            document.getElementById('dModeNum').classList.toggle('active', mode === 'number_only');
+            document.getElementById('dModeBoth').classList.toggle('active', mode === 'both');
+
+            if (lastSelected) updateDisplayCard(lastSelected);
+        }
+
+        function toggleStart() {
+            if (isRunning) pauseTraining();
+            else startCountdown();
+        }
+
+        function startCountdown() {
+            const activeList = techniques.filter(t => t.active);
+            if (activeList.length === 0) {
+                alert('Activa al menos una técnica en la lista');
+                return;
+            }
+
+            const mask = document.getElementById('countdownOverlay');
+            const valEl = document.getElementById('countdownVal');
+            mask.classList.remove('hidden');
+
+            let count = 3;
+            valEl.textContent = count;
+            playBeep(450, 0.12);
+
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    valEl.textContent = count;
+                    playBeep(450, 0.12);
+                } else if (count === 0) {
+                    valEl.textContent = 'HAJIME!';
+                    playBeep(850, 0.25);
+                    speak('¡Hajime!');
+                } else {
+                    clearInterval(interval);
+                    mask.classList.add('hidden');
+                    startTraining();
+                }
+            }, 850);
+        }
+
+        function startTraining() {
+            isRunning = true;
+            const btn = document.getElementById('btnStart');
+            btn.innerHTML = `<span>⏸</span> <span>PAUSA</span>`;
+            btn.style.background = 'var(--accent-gold)';
+            btn.style.color = '#000';
+
+            document.getElementById('btnNext').disabled = false;
+            updateStatusUI(true);
+
+            if (!clockInterval) {
+                clockInterval = setInterval(() => {
+                    elapsedSeconds++;
+                    const m = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+                    const s = (elapsedSeconds % 60).toString().padStart(2, '0');
+                    document.getElementById('timeDisplay').textContent = `${m}:${s}`;
+                }, 1000);
+            }
+
+            triggerNext();
+            scheduleNextCycle();
+        }
+
+        function pauseTraining() {
+            isRunning = false;
+            const btn = document.getElementById('btnStart');
+            btn.innerHTML = `<span>▶️</span> <span>HAJIME !</span>`;
+            btn.style.background = '';
+            btn.style.color = '';
+
+            clearTimeout(timerTimeout);
+            updateStatusUI(false);
+        }
+
+        function stopTraining() {
+            pauseTraining();
+            speak('¡Yamé!');
+
+            document.getElementById('btnNext').disabled = true;
+            clearInterval(clockInterval);
+            clockInterval = null;
+            elapsedSeconds = 0;
+            repCounter = 0;
+            lastSelected = null;
+            historyArray = [];
+
+            document.getElementById('timeDisplay').textContent = '00:00';
+            document.getElementById('repDisplay').textContent = '0';
+            document.getElementById('giantNumDisplay').textContent = '--';
+            document.getElementById('giantNumDisplay').classList.remove('lit');
+            document.getElementById('techSubDisplay').textContent = 'Presiona HAJIME para empezar';
+            document.getElementById('recentHistory').innerHTML = `<span style="opacity:0.5;">ninguno</span>`;
+        }
+
+        function scheduleNextCycle() {
+            clearTimeout(timerTimeout);
+            if (!isRunning) return;
+
+            const delaySec = Math.random() * (maxTime - minTime) + minTime;
+            timerTimeout = setTimeout(() => {
+                if (isRunning) {
+                    triggerNext();
+                    scheduleNextCycle();
+                }
+            }, Math.round(delaySec * 1000));
+        }
+
+        function triggerNext(manual = false) {
+            const activeList = techniques.filter(t => t.active);
+            if (activeList.length === 0) return;
+
+            const noRepeat = document.getElementById('chkNoRepeat').checked;
+            let picked;
+
+            if (noRepeat && activeList.length > 1 && lastSelected) {
+                const pool = activeList.filter(t => t.num !== lastSelected.num);
+                picked = pool[Math.floor(Math.random() * pool.length)];
+            } else {
+                picked = activeList[Math.floor(Math.random() * activeList.length)];
+            }
+
+            lastSelected = picked;
+            repCounter++;
+            document.getElementById('repDisplay').textContent = repCounter;
+
+            updateDisplayCard(picked);
+            pushHistory(picked.num);
+            playBeep(750, 0.08);
+
+            let audioPhrase = '';
+            if (voiceMode === 'number_only') audioPhrase = picked.num.toString();
+            else if (voiceMode === 'tech_only') audioPhrase = picked.name;
+            else if (voiceMode === 'both') audioPhrase = `${picked.num}, ${picked.name}`;
+
+            speak(audioPhrase);
+
+            if (manual && isRunning) scheduleNextCycle();
+        }
+
+        function updateDisplayCard(item) {
+            const numEl = document.getElementById('giantNumDisplay');
+            const subEl = document.getElementById('techSubDisplay');
+
+            numEl.textContent = item.num;
+            numEl.classList.add('lit');
+
+            if (displayMode === 'number_only') {
+                subEl.textContent = '🥋 Ejecuta tu técnica';
+                subEl.style.color = 'var(--text-secondary)';
+            } else {
+                subEl.textContent = item.name;
+                subEl.style.color = 'var(--accent-gold)';
+            }
+        }
+
+        function pushHistory(num) {
+            historyArray.unshift(num);
+            if (historyArray.length > 5) historyArray.pop();
+
+            document.getElementById('recentHistory').innerHTML = historyArray.map(n => `
+                <span class="tag-history">${n}</span>
+            `).join('');
+        }
+
+        function updateStatusUI(active) {
+            const badge = document.getElementById('statusBadge');
+            const card = document.getElementById('displayCard');
+
+            if (active) {
+                badge.classList.add('active');
+                document.getElementById('statusTxt').textContent = 'KUMITE (ENTRENANDO)';
+                card.classList.add('active-run');
+            } else {
+                badge.classList.remove('active');
+                document.getElementById('statusTxt').textContent = 'PAUSA (MATE)';
+                card.classList.remove('active-run');
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+    </script>
+</body>
+</html>
